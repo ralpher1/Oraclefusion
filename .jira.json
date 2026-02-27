@@ -1,0 +1,176 @@
+{
+  "project": "OF",
+  "epics": [
+    {
+      "key": "OF-1",
+      "summary": "Oraclefusion Educational Platform",
+      "status": "Done"
+    }
+  ],
+  "stories": [
+    {
+      "key": "OF-2",
+      "summary": "Project Setup and Spring Boot Architecture",
+      "status": "Done",
+      "parent": "OF-1",
+      "description": "Define project structure, Spring Boot configuration, database schema, and core architecture for the Oracle Fusion educational platform.",
+      "issue_url": "https://github.com/ralpher1/Oraclefusion/issues/2"
+    },
+    {
+      "key": "OF-6",
+      "summary": "Oracle Fusion HCM Educational Module",
+      "status": "Done",
+      "parent": "OF-1",
+      "description": "Plan the Human Capital Management educational module covering HR, Talent Management, and Workforce Management training content.",
+      "issue_url": "https://github.com/ralpher1/Oraclefusion/issues/3"
+    },
+    {
+      "key": "OF-10",
+      "summary": "Oracle Fusion ERP Educational Module",
+      "status": "Done",
+      "parent": "OF-1",
+      "description": "Plan the Enterprise Resource Planning educational module covering Financials, Procurement, and Project Management training content.",
+      "issue_url": "https://github.com/ralpher1/Oraclefusion/issues/4"
+    },
+    {
+      "key": "OF-14",
+      "summary": "Educational Content Delivery System",
+      "status": "Done",
+      "parent": "OF-1",
+      "description": "Design the content delivery system including interactive tutorials, quizzes, progress tracking, and learning dashboard.",
+      "issue_url": "https://github.com/ralpher1/Oraclefusion/issues/5"
+    },
+    {
+      "key": "OF-18",
+      "summary": "User Authentication and Progress Tracking",
+      "status": "Done",
+      "parent": "OF-1",
+      "description": "Plan user authentication, authorization, role-based access, and learning progress persistence.",
+      "issue_url": "https://github.com/ralpher1/Oraclefusion/issues/6"
+    },
+    {
+      "key": "OF-22",
+      "summary": "Interactive Labs and API Demonstrations",
+      "status": "Done",
+      "parent": "OF-1",
+      "description": "Design the interactive lab environment and API demonstration features for hands-on Oracle Fusion learning.",
+      "issue_url": "https://github.com/ralpher1/Oraclefusion/issues/7"
+    }
+  ],
+  "subtasks": [
+    {
+      "key": "OF-3",
+      "summary": "Create architecture outline and technology stack document",
+      "status": "Done",
+      "parent": "OF-2"
+    },
+    {
+      "key": "OF-4",
+      "summary": "Define database schema and entity relationships",
+      "status": "Done",
+      "parent": "OF-2"
+    },
+    {
+      "key": "OF-5",
+      "summary": "Document Spring Boot project structure and configuration",
+      "status": "Done",
+      "parent": "OF-2"
+    },
+    {
+      "key": "OF-7",
+      "summary": "Define HCM educational content structure and learning paths",
+      "status": "Done",
+      "parent": "OF-6"
+    },
+    {
+      "key": "OF-8",
+      "summary": "Document Oracle Fusion HCM API integration patterns",
+      "status": "Done",
+      "parent": "OF-6"
+    },
+    {
+      "key": "OF-9",
+      "summary": "Create HCM hands-on lab specifications",
+      "status": "Done",
+      "parent": "OF-6"
+    },
+    {
+      "key": "OF-11",
+      "summary": "Define ERP educational content structure and learning paths",
+      "status": "Done",
+      "parent": "OF-10"
+    },
+    {
+      "key": "OF-12",
+      "summary": "Document Oracle Fusion ERP API integration patterns",
+      "status": "Done",
+      "parent": "OF-10"
+    },
+    {
+      "key": "OF-13",
+      "summary": "Create ERP hands-on lab specifications",
+      "status": "Done",
+      "parent": "OF-10"
+    },
+    {
+      "key": "OF-15",
+      "summary": "Design content delivery architecture and UI wireframes",
+      "status": "Done",
+      "parent": "OF-14"
+    },
+    {
+      "key": "OF-16",
+      "summary": "Define quiz engine and assessment framework",
+      "status": "Done",
+      "parent": "OF-14"
+    },
+    {
+      "key": "OF-17",
+      "summary": "Plan progress tracking and learning dashboard features",
+      "status": "Done",
+      "parent": "OF-14"
+    },
+    {
+      "key": "OF-19",
+      "summary": "Define authentication and authorization architecture",
+      "status": "Done",
+      "parent": "OF-18"
+    },
+    {
+      "key": "OF-20",
+      "summary": "Design user profile and progress data model",
+      "status": "Done",
+      "parent": "OF-18"
+    },
+    {
+      "key": "OF-21",
+      "summary": "Document API endpoints for user management",
+      "status": "Done",
+      "parent": "OF-18"
+    },
+    {
+      "key": "OF-23",
+      "summary": "Design sandbox lab environment architecture",
+      "status": "Done",
+      "parent": "OF-22"
+    },
+    {
+      "key": "OF-24",
+      "summary": "Define API demonstration framework and mock services",
+      "status": "Done",
+      "parent": "OF-22"
+    },
+    {
+      "key": "OF-25",
+      "summary": "Create test strategy and acceptance criteria document",
+      "status": "Done",
+      "parent": "OF-22"
+    }
+  ],
+  "confluencePages": [
+    "24641537"
+  ],
+  "boardId": 1530,
+  "sprintId": 1469,
+  "sprintState": "active"
+}
