@@ -480,3 +480,227 @@ For "live API demonstration" pages (read-only, no student interaction):
 ---
 
 *OF-25 section prepared by Tester agent — 2026-02-27. Parent: OF-22 Interactive Labs and API Demonstrations.*
+
+---
+
+### Builder — OF-3: Architecture Outline and Technology Stack
+
+**Parent story**: OF-2 — Project Setup and Spring Boot Architecture
+
+---
+
+## 13. Technology Stack
+
+| Layer | Technology | Version | Purpose |
+|-|-|-|-|
+| Runtime | Java | 17+ (LTS) | Application language |
+| Framework | Spring Boot | 3.2+ | Web application framework |
+| Web | Spring MVC + Thymeleaf | - | Server-side rendering with REST API support |
+| Security | Spring Security | 6.x | Authentication, authorization, CSRF, session mgmt |
+| Persistence | Spring Data JPA + Hibernate | - | ORM and repository abstraction |
+| Database | PostgreSQL | 15+ | Primary relational data store |
+| Caching | Redis + Spring Cache | - | Session store, API response caching |
+| Migration | Flyway | 9+ | Database schema versioning |
+| HTTP Client | Spring WebClient (WebFlux) | - | Non-blocking Oracle Fusion API calls |
+| Build | Maven | 3.9+ | Build and dependency management |
+| Docs | SpringDoc OpenAPI | 2.x | Swagger UI for REST API documentation |
+| Monitoring | Spring Boot Actuator + Micrometer | - | Health checks, metrics, Prometheus export |
+
+---
+
+## 14. Layered Architecture
+
+```
+┌─────────────────────────────────────────────────────┐
+│                   Presentation Layer                │
+│  Thymeleaf templates, REST controllers, error views │
+├─────────────────────────────────────────────────────┤
+│                    Service Layer                    │
+│  Business logic, content orchestration, quiz engine │
+├─────────────────────────────────────────────────────┤
+│                  Integration Layer                  │
+│  Oracle Fusion API clients, caching, retry logic    │
+├─────────────────────────────────────────────────────┤
+│                  Persistence Layer                  │
+│  JPA repositories, entities, Flyway migrations      │
+├─────────────────────────────────────────────────────┤
+│                  Infrastructure                     │
+│  PostgreSQL, Redis, Oracle Fusion Cloud (external)  │
+└─────────────────────────────────────────────────────┘
+```
+
+### 14.1 Package Structure
+
+```
+com.oraclefusion.edu/
+  config/           — Spring configuration (Security, WebClient, Cache, CORS)
+  controller/
+    web/            — Thymeleaf page controllers (dashboard, courses, labs)
+    api/            — REST API controllers (progress, quizzes, admin)
+  service/
+    course/         — CourseService, LessonService, EnrollmentService
+    quiz/           — QuizService, QuestionService, ScoreService
+    lab/             — LabService, LabStepRunner, LabResultService
+    progress/       — ProgressService, BadgeService, CertificateService
+    user/           — UserService, RoleService
+  integration/
+    oracle/
+      hcm/          — HcmApiClient, HcmDataMapper
+      erp/          — ErpApiClient, ErpDataMapper
+      scm/          — ScmApiClient, ScmDataMapper
+      cx/           — CxApiClient, CxDataMapper
+      analytics/    — AnalyticsApiClient, AnalyticsDataMapper
+      auth/         — OracleOAuth2TokenProvider
+    cache/          — CacheConfig, CacheKeyGenerator
+  repository/       — JPA repositories (CourseRepo, UserRepo, ProgressRepo, etc.)
+  entity/           — JPA entities (Course, Lesson, Quiz, User, Progress, Badge)
+  dto/              — Data transfer objects for API and view layer
+  exception/        — Custom exceptions, global error handler
+  util/             — Helpers (date, formatting, validation)
+```
+
+### 14.2 Module Organization
+
+Each Oracle Fusion module (HCM, ERP, SCM, CX, Analytics) is organized as a self-contained package under `integration/oracle/` with:
+- **ApiClient**: WebClient-based HTTP client with retry, timeout, error mapping
+- **DataMapper**: Transforms Oracle Fusion API JSON to internal DTOs
+- **Configuration**: Module-specific properties (base URL, credentials, cache TTL)
+
+Each module's educational content follows the same structure:
+- Courses contain Lessons
+- Lessons contain Content Blocks (text, video, interactive) and end with a Quiz
+- Labs are standalone exercises tied to a module, consisting of ordered Steps
+
+---
+
+## 15. Database Schema (Key Entities)
+
+```sql
+-- Users and Auth
+users (id, email, password_hash, display_name, role, created_at, last_login)
+user_roles (user_id, role)  -- STUDENT, INSTRUCTOR, ADMIN
+
+-- Course Content
+courses (id, module, title, description, difficulty, estimated_hours, published)
+lessons (id, course_id, sequence, title, content_type, content_body, duration_min)
+content_blocks (id, lesson_id, sequence, block_type, body, media_url)
+
+-- Quizzes
+quizzes (id, lesson_id, passing_score, time_limit_min)
+questions (id, quiz_id, sequence, text, question_type, correct_answer, options_json)
+quiz_attempts (id, quiz_id, user_id, score, passed, started_at, completed_at)
+
+-- Labs
+labs (id, module, title, description, difficulty, prerequisite_lesson_id)
+lab_steps (id, lab_id, sequence, instruction, expected_api_call, validation_rule)
+lab_attempts (id, lab_id, user_id, status, started_at, completed_at)
+lab_step_results (id, lab_attempt_id, lab_step_id, passed, response_data, submitted_at)
+
+-- Progress
+enrollments (id, user_id, course_id, enrolled_at, completed_at, status)
+lesson_progress (id, user_id, lesson_id, status, position, last_accessed)
+badges (id, name, description, icon_url, criteria_type, criteria_value)
+user_badges (id, user_id, badge_id, earned_at)
+certificates (id, user_id, module, issued_at, certificate_url)
+```
+
+---
+
+### Builder — OF-15: Content Delivery Architecture
+
+**Parent story**: OF-14 — Educational Content Delivery System
+
+---
+
+## 16. Content Delivery Architecture
+
+### 16.1 Tutorial Engine
+- **Rendering**: Thymeleaf templates with fragment composition. Each lesson renders as a sequence of content blocks (text, code, video, interactive widget).
+- **Content Storage**: Lesson body stored in DB as structured markdown. Rendered server-side via a MarkdownProcessor service.
+- **Media**: Video content embedded via iframe (YouTube/Vimeo or self-hosted). Static assets served from `/static/media/` or CDN.
+- **Navigation**: Prev/Next lesson navigation with progress bar. Breadcrumb: Module > Course > Lesson.
+
+### 16.2 Quiz Engine
+- **Question Types**: Multiple choice, true/false, fill-in-the-blank, code completion.
+- **Scoring**: Server-side scoring only — no client-side answer validation to prevent cheating.
+- **Time Limits**: Optional per-quiz timer enforced server-side. Timer starts on first question load.
+- **Retry Policy**: Configurable max attempts per quiz (default: 3). Best score preserved.
+- **Results**: Immediate score display. Detailed review showing correct/incorrect per question available after submission.
+
+### 16.3 Lab Environment
+- **Sandbox Model**: Each lab session creates an isolated context (in-memory state + mock API session).
+- **Step Execution**: Sequential steps. Each step submission validated against expected Oracle Fusion API call pattern.
+- **Feedback Loop**: Step result returned immediately. Hints available after first failure. Full solution revealed after 3 failed attempts.
+- **State Persistence**: Lab attempt state persisted to DB. Students can resume incomplete labs.
+
+### 16.4 Learning Dashboard
+- **Student View**: Course progress bars, upcoming lessons, recent quiz scores, earned badges, module completion percentage.
+- **Instructor View**: Student roster, aggregate completion rates, quiz score distributions, struggling students report.
+- **Admin View**: Platform usage metrics, content management, user management, system health.
+
+---
+
+### Builder — OF-19: Authentication and Authorization Architecture
+
+**Parent story**: OF-18 — User Authentication and Progress Tracking
+
+---
+
+## 17. Authentication Architecture
+
+### 17.1 Spring Security Configuration
+- **Authentication**: Form-based login with Spring Security's `formLogin()`. BCrypt password hashing.
+- **Session Management**: Server-side sessions stored in Redis for horizontal scalability. `SessionCreationPolicy.IF_REQUIRED`.
+- **Remember Me**: Token-based remember-me with persistent token repository (DB-backed).
+- **CSRF**: Enabled for all form submissions. Thymeleaf auto-injects CSRF tokens.
+- **CORS**: Configured for API endpoints if a separate frontend SPA is added later.
+
+### 17.2 Role-Based Access Control
+
+| Role | Access |
+|-|-|
+| STUDENT | Browse courses, take lessons, submit quizzes, run labs, view own progress |
+| INSTRUCTOR | All student access + view student progress reports + manage course content |
+| ADMIN | All instructor access + user management + system configuration + analytics |
+
+### 17.3 Security Filter Chain
+```
+HTTP Request
+  → CsrfFilter
+  → SessionManagementFilter
+  → UsernamePasswordAuthenticationFilter (login)
+  → RememberMeAuthenticationFilter
+  → AuthorizationFilter (role-based URL patterns)
+  → Controller
+```
+
+### 17.4 URL Authorization Rules
+```
+/                           — permitAll (landing page)
+/login, /register           — permitAll
+/courses/**, /lessons/**    — hasRole(STUDENT)
+/labs/**                    — hasRole(STUDENT)
+/api/progress/**            — hasRole(STUDENT)
+/instructor/**              — hasRole(INSTRUCTOR)
+/admin/**                   — hasRole(ADMIN)
+/api/admin/**               — hasRole(ADMIN)
+/actuator/**                — hasRole(ADMIN) or IP whitelist
+```
+
+### 17.5 User Registration Flow
+1. Student fills registration form (email, password, display name)
+2. Server validates: email uniqueness, password strength (min 8 chars, mixed case, digit)
+3. BCrypt hash stored. Default role: STUDENT
+4. Welcome email sent (async via Spring Events + email service)
+5. Redirect to login page with success message
+
+### 17.6 Progress Tracking Data Model
+- **Enrollment**: Created when student starts a course. Tracks overall course status.
+- **Lesson Progress**: Per-lesson record with status (NOT_STARTED, IN_PROGRESS, COMPLETED), position bookmark, last access timestamp.
+- **Quiz Attempts**: Immutable records of each quiz attempt with score and answers.
+- **Lab Attempts**: Records of lab sessions with per-step results.
+- **Badges & Certificates**: Awarded automatically via event listeners when criteria met (e.g., course completion, quiz score threshold).
+
+---
+
+*Architecture planning content prepared by General Builder — Project Planning Architect. Session 2026-02-27.*
