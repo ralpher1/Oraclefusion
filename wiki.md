@@ -275,3 +275,208 @@ oracle:
 ---
 
 *Document prepared by the Tester agent — planning session 2026-02-27. For execution by the build team.*
+
+---
+
+### Tester — OF-25: Oracle Fusion Module Acceptance Criteria & Interactive Labs Testing
+
+**Parent story**: OF-22 — Interactive Labs and API Demonstrations
+**Scope**: Acceptance criteria per Oracle Fusion cloud module, plus testing strategy for interactive labs and live API demo flows.
+
+---
+
+## 11. Oracle Fusion Module Acceptance Criteria (OF-25)
+
+Each module section below covers: unit test scope, integration mock stubs, E2E lab flows, and acceptance criteria.
+
+---
+
+### 11.1 HCM — Human Capital Management
+
+**What the platform teaches**: Core HR, Workforce Management, Talent Management, Payroll concepts via Oracle HCM Cloud REST APIs.
+
+**Unit Test Scope**
+- `HcmContentService`: fetches, caches, and maps HCM API responses to lesson DTOs.
+- `HcmLabService`: generates lab exercises (e.g., create employee, run payroll simulation).
+- Controllers: `GET /api/labs/hcm/{exerciseId}` — 200 with lab spec, 404 on missing exercise.
+
+**WireMock Stubs Required**
+| Stub | Endpoint | Response |
+|-|-|-|
+| Employee list | `GET /hcmRestApi/resources/latest/workers` | Array of worker objects |
+| Single employee | `GET /hcmRestApi/resources/latest/workers/{id}` | Worker detail object |
+| Payroll run | `POST /hcmRestApi/resources/latest/payrollRuns` | Payroll run confirmation |
+| Talent profile | `GET /hcmRestApi/resources/latest/talentProfiles` | Profile list |
+
+**Acceptance Criteria**
+- Given a student opens the HCM lab, when the exercise loads, then a sandboxed employee dataset renders within 3s.
+- Given a student submits a "create employee" lab step, when validated, then the mock HCM API call is logged and success feedback shown.
+- Given the HCM API stub returns 403, when lab step executes, then "Insufficient permissions — check your API role setup" guidance displayed.
+- Given a student completes all HCM lab steps, when marked done, then HCM module badge awarded and progress updated.
+- Given a quiz on Core HR concepts, when submitted with >= 70% score, then "HCM Fundamentals" certificate unlocked.
+
+**Performance Target**: HCM lab exercise load (with mock data) p95 < 600ms under 50 concurrent lab sessions.
+
+---
+
+### 11.2 ERP — Enterprise Resource Planning
+
+**What the platform teaches**: General Ledger, Accounts Payable/Receivable, Fixed Assets, Cash Management via Oracle Financials Cloud.
+
+**Unit Test Scope**
+- `ErpContentService`: maps Financials Cloud API responses to tutorial content.
+- `ErpLabService`: generates journal entry, invoice, and ledger exercise scenarios.
+- Controllers: `GET /api/labs/erp/{exerciseId}`, `POST /api/labs/erp/{exerciseId}/submit`.
+
+**WireMock Stubs Required**
+| Stub | Endpoint | Response |
+|-|-|-|
+| Ledger list | `GET /fscmRestApi/resources/latest/ledgers` | Ledger array |
+| Journal entries | `GET /fscmRestApi/resources/latest/journalEntries` | Journal entry list |
+| Create invoice | `POST /fscmRestApi/resources/latest/invoices` | Invoice confirmation |
+| AP transactions | `GET /fscmRestApi/resources/latest/payablesTransactions` | Transaction list |
+
+**Acceptance Criteria**
+- Given a student opens the ERP General Ledger lab, when loaded, then a chart of accounts renders with sample data within 3s.
+- Given a student creates a journal entry in the lab, when submitted, then debit/credit balance validation runs client-side and mock API call confirmed.
+- Given an unbalanced journal entry submitted, when validated, then "Debits must equal credits" error shown before API call.
+- Given a student completes the Accounts Payable exercise, when marked done, then next ERP lesson (AR) unlocks.
+- Given a quiz on GL fundamentals, when passed, then ERP pathway progress advances to next module.
+- Given Oracle Financials stub returns 500, when lab step executes, then student sees "API temporarily unavailable — results saved locally" message.
+
+**Performance Target**: ERP lab with ledger data render p95 < 700ms under 40 concurrent sessions.
+
+---
+
+### 11.3 SCM — Supply Chain Management
+
+**What the platform teaches**: Procurement, Inventory, Order Management, Manufacturing via Oracle SCM Cloud.
+
+**Unit Test Scope**
+- `ScmContentService`: fetches procurement and inventory data for tutorial content.
+- `ScmLabService`: generates purchase order, shipment, and inventory exercises.
+- Controllers: `GET /api/labs/scm/{exerciseId}`, `POST /api/labs/scm/{exerciseId}/submit`.
+
+**WireMock Stubs Required**
+| Stub | Endpoint | Response |
+|-|-|-|
+| Purchase orders | `GET /fscmRestApi/resources/latest/purchaseOrders` | PO list |
+| Create PO | `POST /fscmRestApi/resources/latest/purchaseOrders` | PO confirmation |
+| Inventory items | `GET /fscmRestApi/resources/latest/inventoryItems` | Item catalog |
+| Shipments | `GET /fscmRestApi/resources/latest/shipments` | Shipment list |
+
+**Acceptance Criteria**
+- Given a student opens the SCM Procurement lab, when loaded, then a supplier catalog with sample items renders within 3s.
+- Given a student creates a purchase order in the lab, when submitted, then PO number generated and confirmation screen shown.
+- Given a student runs the inventory check exercise, when completed, then stock levels update in the lab UI to reflect the mock transaction.
+- Given a student completes all SCM lab exercises, when marked done, then SCM pathway certificate awarded.
+- Given a quiz on procurement workflows, when passed with >= 70%, then Order Management module unlocked.
+- Given concurrent PO creation attempts (10 users), when executed simultaneously, then no data collision errors in lab state.
+
+**Performance Target**: SCM lab PO creation round-trip p95 < 800ms under 30 concurrent sessions.
+
+---
+
+### 11.4 CX — Customer Experience (CRM)
+
+**What the platform teaches**: Sales, Service, Marketing, Loyalty via Oracle CX Cloud (formerly Oracle CRM).
+
+**Unit Test Scope**
+- `CxContentService`: maps CRM API responses to tutorial and quiz content.
+- `CxLabService`: generates opportunity, case, and campaign exercises.
+- Controllers: `GET /api/labs/cx/{exerciseId}`, `POST /api/labs/cx/{exerciseId}/submit`.
+
+**WireMock Stubs Required**
+| Stub | Endpoint | Response |
+|-|-|-|
+| Opportunities | `GET /crmRestApi/resources/latest/opportunities` | Opportunity list |
+| Create opportunity | `POST /crmRestApi/resources/latest/opportunities` | Opportunity record |
+| Service requests | `GET /crmRestApi/resources/latest/serviceRequests` | SR list |
+| Contacts | `GET /crmRestApi/resources/latest/contacts` | Contact list |
+| Campaigns | `GET /crmRestApi/resources/latest/campaigns` | Campaign list |
+
+**Acceptance Criteria**
+- Given a student opens the CX Sales lab, when loaded, then a pipeline of sample opportunities renders within 3s.
+- Given a student creates a new sales opportunity, when submitted, then opportunity appears in the pipeline with correct stage.
+- Given a student closes an opportunity as "Won", when confirmed, then revenue contribution shown in the lab dashboard.
+- Given a student opens the Service lab, when a case is created, then SLA timer starts and priority level enforced.
+- Given a quiz on Oracle CX sales process, when passed, then CX module badge awarded.
+- Given the CRM stub is slow (>2s response — simulated via WireMock delay), when lab loads, then loading spinner shown and no timeout error until 10s threshold.
+
+**Performance Target**: CX opportunity pipeline render p95 < 500ms under 60 concurrent sessions.
+
+---
+
+### 11.5 Analytics — Oracle Analytics Cloud (OAC)
+
+**What the platform teaches**: Data visualization, dashboards, report building, and AI/ML insights via Oracle Analytics Cloud.
+
+**Unit Test Scope**
+- `AnalyticsContentService`: fetches OAC dataset metadata and embeds for tutorial rendering.
+- `AnalyticsLabService`: generates dashboard-building and report exercises.
+- Controllers: `GET /api/labs/analytics/{exerciseId}`, `POST /api/labs/analytics/{exerciseId}/submit`.
+
+**WireMock Stubs Required**
+| Stub | Endpoint | Response |
+|-|-|-|
+| Dataset list | `GET /api/20210901/datasets` | Dataset array |
+| Dataset detail | `GET /api/20210901/datasets/{id}` | Dataset schema |
+| Workbook list | `GET /api/20210901/workbooks` | Workbook list |
+| Create workbook | `POST /api/20210901/workbooks` | Workbook confirmation |
+| Embedded report | `GET /api/20210901/visualizations/{id}/embed` | Embed URL/token |
+
+**Acceptance Criteria**
+- Given a student opens the Analytics lab, when loaded, then sample datasets render in a data browser within 3s.
+- Given a student drags a dimension to the canvas, when dropped, then a chart automatically generates with sample data.
+- Given a student saves a workbook, when confirmed, then workbook appears in "My Work" panel within 1s.
+- Given a student runs a pre-built report, when executed, then data table renders with correct row count matching the stub dataset.
+- Given a quiz on OAC visualization types, when passed with >= 70%, then Analytics certificate unlocked.
+- Given an embedded OAC report iframe, when loaded, then no X-Frame-Options CSP errors appear in browser console.
+- Given 80 concurrent students viewing dashboards, when load test runs, then p95 < 1.2s and 0% error rate.
+
+**Performance Target**: Analytics lab dashboard render p95 < 1.2s under 80 concurrent sessions (highest load — visualization-heavy).
+
+---
+
+## 12. Interactive Labs Testing Strategy (OF-25)
+
+### 12.1 Lab Execution Model
+Each interactive lab consists of:
+1. **Exercise spec** — instructions rendered from DB, fetched via `GET /api/labs/{module}/{exerciseId}`
+2. **Step runner** — student submits each step, validated server-side against expected mock API call
+3. **Result feedback** — immediate pass/fail per step with guidance
+4. **Lab completion** — all steps passed → progress event emitted → badge/certificate logic triggered
+
+### 12.2 Lab-Specific Integration Tests
+```
+HcmLabIntegrationTest
+  - loadExercise_returnsSpec_whenFound
+  - submitStep_callsMockHcmApi_andReturnsSuccess
+  - submitStep_handlesApiError_gracefully
+  - completeAllSteps_triggersBadgeEvent
+
+ErpLabIntegrationTest  [same pattern per module]
+ScmLabIntegrationTest
+CxLabIntegrationTest
+AnalyticsLabIntegrationTest
+```
+
+### 12.3 E2E Lab Flows (Playwright)
+| Flow | Steps | Pass Criteria |
+|-|-|-|
+| HCM Lab: Create Employee | Login → Open HCM lab → Fill form → Submit | Success message, step marked done |
+| ERP Lab: Journal Entry | Open ERP lab → Enter debit/credit → Submit | Balance validated, entry confirmed |
+| SCM Lab: Purchase Order | Open SCM lab → Select supplier → Create PO | PO number generated, confirmation shown |
+| CX Lab: Sales Opportunity | Open CX lab → Create opportunity → Advance stage | Stage updated in pipeline |
+| Analytics Lab: Build Dashboard | Open Analytics lab → Drag dimension → Save workbook | Chart renders, workbook saved |
+
+### 12.4 API Demo Flow Testing
+For "live API demonstration" pages (read-only, no student interaction):
+- Verify mock stub returns data within SLA.
+- Verify rendered data matches stub fixture (no transformation errors).
+- Verify error state renders correctly when stub returns 5xx.
+- No authentication to Oracle Fusion production — all demo calls hit WireMock in test and staging.
+
+---
+
+*OF-25 section prepared by Tester agent — 2026-02-27. Parent: OF-22 Interactive Labs and API Demonstrations.*
