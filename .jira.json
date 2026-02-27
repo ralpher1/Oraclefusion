@@ -61,7 +61,7 @@
     {
       "key": "OF-3",
       "summary": "Create architecture outline and technology stack document",
-      "status": "To Do",
+      "status": "In Progress",
       "parent": "OF-2"
     },
     {
@@ -115,7 +115,7 @@
     {
       "key": "OF-15",
       "summary": "Design content delivery architecture and UI wireframes",
-      "status": "To Do",
+      "status": "In Progress",
       "parent": "OF-14"
     },
     {
@@ -133,7 +133,7 @@
     {
       "key": "OF-19",
       "summary": "Define authentication and authorization architecture",
-      "status": "To Do",
+      "status": "In Progress",
       "parent": "OF-18"
     },
     {
@@ -163,7 +163,7 @@
     {
       "key": "OF-25",
       "summary": "Create test strategy and acceptance criteria document",
-      "status": "To Do",
+      "status": "Done",
       "parent": "OF-22"
     }
   ],
