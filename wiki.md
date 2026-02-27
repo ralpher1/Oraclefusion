@@ -704,3 +704,168 @@ HTTP Request
 ---
 
 *Architecture planning content prepared by General Builder — Project Planning Architect. Session 2026-02-27.*
+
+---
+
+### Builder-General — OF-6 OF-10: Oracle Fusion Module Curriculum Outline
+
+**Parent stories**: OF-6 (HCM Module), OF-10 (ERP Module)
+**Scope**: Detailed course curriculum structure for all five Oracle Fusion product lines.
+
+---
+
+## 18. Course Curriculum Outline
+
+### Course 1: Oracle HCM Cloud Fundamentals
+
+**Target Audience**: HR Admins, Payroll Specialists new to Oracle HCM
+**Difficulty**: Beginner
+**Estimated Duration**: 8 hours
+
+| Module | Title | Lessons | Key Topics |
+|-|-|-|-|
+| 1 | Introduction to Oracle HCM | 3 | Cloud overview, navigation, roles |
+| 2 | Core HR | 5 | Worker model, positions, org structures |
+| 3 | Talent Management | 4 | Goals, performance, succession |
+| 4 | Absence Management | 3 | Absence types, accruals, self-service |
+| 5 | HCM REST API Basics | 4 | Auth, worker API, HDL intro |
+
+**Capstone Lab**: Configure a worker hierarchy, run a talent review, and query the HCM REST API for org data.
+
+### Course 2: Oracle ERP Cloud Essentials
+
+**Target Audience**: Finance Analysts, Accountants learning Oracle Financials
+**Difficulty**: Beginner-Intermediate
+**Estimated Duration**: 10 hours
+
+| Module | Title | Lessons | Key Topics |
+|-|-|-|-|
+| 1 | Financials Overview | 2 | Cloud ERP landscape, key concepts |
+| 2 | General Ledger | 5 | COA, journals, period close, reports |
+| 3 | Accounts Payable | 4 | Suppliers, invoices, payments |
+| 4 | Accounts Receivable | 4 | Customers, invoices, receipts |
+| 5 | ERP REST & FBDI | 5 | FBDI templates, REST endpoints, automation |
+
+**Capstone Lab**: Create a journal entry via REST API, generate an FBDI template, and import AP invoices.
+
+### Course 3: Oracle SCM Cloud Practitioner
+
+**Target Audience**: Supply Chain Analysts, Procurement Specialists
+**Difficulty**: Intermediate
+**Estimated Duration**: 10 hours
+
+| Module | Title | Lessons | Key Topics |
+|-|-|-|-|
+| 1 | SCM Overview | 2 | Supply chain concepts, Fusion SCM modules |
+| 2 | Inventory Management | 5 | Items, organizations, transactions |
+| 3 | Procurement | 4 | PO lifecycle, requisitions, sourcing |
+| 4 | Order Management | 4 | Sales orders, shipping, returns |
+| 5 | SCM APIs | 4 | Item REST, PO REST, integration patterns |
+
+**Capstone Lab**: Create a purchase order, receive inventory, and fulfill a sales order using REST APIs.
+
+### Course 4: Oracle CX Cloud Sales & Service
+
+**Target Audience**: Sales Reps, Service Agents, CRM Admins
+**Difficulty**: Beginner-Intermediate
+**Estimated Duration**: 8 hours
+
+| Module | Title | Lessons | Key Topics |
+|-|-|-|-|
+| 1 | CX Platform Overview | 2 | Sales Cloud vs Service Cloud, navigation |
+| 2 | Sales Cloud | 5 | Accounts, contacts, opportunities, forecasting |
+| 3 | Service Cloud | 4 | Service requests, queues, SLAs |
+| 4 | CX REST APIs | 4 | Opportunity, account, SR endpoints |
+
+**Capstone Lab**: Manage a full sales cycle from account creation to closed-won, then escalate to service.
+
+### Course 5: Oracle Analytics Cloud (OAC)
+
+**Target Audience**: BI Analysts, Report Developers
+**Difficulty**: Intermediate-Advanced
+**Estimated Duration**: 12 hours
+
+| Module | Title | Lessons | Key Topics |
+|-|-|-|-|
+| 1 | OAC Fundamentals | 3 | Datasets, data flows, projects |
+| 2 | Visualization & Dashboards | 5 | Canvas, charts, KPIs, filters |
+| 3 | Data Modeling | 5 | Subject areas, logical model, RPD |
+| 4 | OAC APIs & Embedding | 4 | REST API, embedding SDK, export |
+| 5 | AI & Machine Learning | 3 | Explain, auto insights, ML models |
+
+**Capstone Lab**: Build a multi-page dashboard, embed it via the OAC SDK, and export via REST API.
+
+---
+
+## 19. Oracle Fusion API Integration Strategy (OF-22 / OF-24)
+
+### 19.1 Authentication Flow
+
+```
+Spring Boot App
+  └── FusionApiService
+      └── WebClient (reactive, non-blocking)
+          └── OAuth2AuthorizedClientManager
+              └── ClientCredentials grant
+                  └── Oracle IDCS / OCI IAM token endpoint
+```
+
+Environment configuration (never hardcoded, loaded via application.yml from env vars):
+
+```yaml
+oracle.fusion:
+  base-url: ${FUSION_BASE_URL}
+  client-id: ${FUSION_CLIENT_ID}
+  client-secret: ${FUSION_CLIENT_SECRET}
+  token-url: ${FUSION_TOKEN_URL}
+  scope: ${FUSION_SCOPE}
+```
+
+### 19.2 Per-Module API Endpoints
+
+| Module | Key Endpoint | HTTP Method | Demo Purpose |
+|-|-|-|-|
+| HCM | `/hcmRestApi/resources/11.13.18.05/workers` | GET | Live org chart in HCM lessons |
+| ERP | `/fscmRestApi/resources/11.13.18.05/journalEntries` | POST | Journal entry creation demo |
+| SCM | `/fscmRestApi/resources/11.13.18.05/inventoryItems` | GET | Live item catalog in SCM lessons |
+| CX | `/crmRestApi/resources/11.13.18.05/opportunities` | GET | Pipeline visualization in CX lessons |
+| OAC | `/api/20210901/embeddedContent` (OAC SDK) | GET | Embedded dashboard iframe |
+
+### 19.3 API Demo Framework Design (OF-24)
+
+**Live Demo Pages**: Read-only pages in each course module showing real-time Oracle Fusion data. No student input — purely observational with annotations explaining the API response structure.
+
+**Mock Service Layer**: `FusionMockService` — activated via `@Profile("mock")` — returns fixture JSON from `src/main/resources/fusion-fixtures/{module}/`. Allows full platform functionality without live credentials.
+
+**Fixture File Layout**:
+```
+src/main/resources/fusion-fixtures/
+  hcm/
+    workers-list.json          -- sample worker collection
+    worker-detail.json         -- single worker with full attributes
+  erp/
+    journal-entries.json       -- sample journal entry collection
+    ledgers.json               -- chart of accounts sample
+  scm/
+    inventory-items.json       -- item catalog sample
+    purchase-orders.json       -- PO list sample
+  cx/
+    opportunities.json         -- pipeline data sample
+    service-requests.json      -- SR queue sample
+  oac/
+    datasets.json              -- dataset metadata sample
+    workbooks.json             -- workbook list sample
+```
+
+**Circuit Breaker**: If live Fusion API fails (network, auth, 5xx), the service auto-falls-back to fixture data with a visible "Demo Mode — Live API Unavailable" banner rendered in the UI.
+
+### 19.4 API Rate Limiting & Caching
+
+- Oracle Fusion REST APIs have per-tenant rate limits — cache all GET responses in Redis.
+- Default cache TTL: 5 minutes for list endpoints, 15 minutes for detail endpoints.
+- Cache keys: `fusion:{module}:{endpoint}:{params-hash}`
+- Cache invalidation: manual admin endpoint `/api/admin/cache/flush/{module}`
+
+---
+
+*Module curriculum and API integration planning prepared by Builder-General agent — 2026-02-27.*
