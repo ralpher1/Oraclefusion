@@ -11,7 +11,7 @@
     {
       "key": "OF-2",
       "summary": "Project Setup and Spring Boot Architecture",
-      "status": "To Do",
+      "status": "In Progress",
       "parent": "OF-1",
       "description": "Define project structure, Spring Boot configuration, database schema, and core architecture for the Oracle Fusion educational platform.",
       "issue_url": "https://github.com/ralpher1/Oraclefusion/issues/2"
@@ -35,7 +35,7 @@
     {
       "key": "OF-14",
       "summary": "Educational Content Delivery System",
-      "status": "To Do",
+      "status": "In Progress",
       "parent": "OF-1",
       "description": "Design the content delivery system including interactive tutorials, quizzes, progress tracking, and learning dashboard.",
       "issue_url": "https://github.com/ralpher1/Oraclefusion/issues/5"
@@ -43,7 +43,7 @@
     {
       "key": "OF-18",
       "summary": "User Authentication and Progress Tracking",
-      "status": "To Do",
+      "status": "In Progress",
       "parent": "OF-1",
       "description": "Plan user authentication, authorization, role-based access, and learning progress persistence.",
       "issue_url": "https://github.com/ralpher1/Oraclefusion/issues/6"
@@ -51,7 +51,7 @@
     {
       "key": "OF-22",
       "summary": "Interactive Labs and API Demonstrations",
-      "status": "To Do",
+      "status": "In Progress",
       "parent": "OF-1",
       "description": "Design the interactive lab environment and API demonstration features for hands-on Oracle Fusion learning.",
       "issue_url": "https://github.com/ralpher1/Oraclefusion/issues/7"
